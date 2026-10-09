@@ -1,7 +1,7 @@
 import sqlite3
 import unittest
 
-from database import create_database
+from db.database import create_database
 
 
 class DatabaseTests(unittest.TestCase):

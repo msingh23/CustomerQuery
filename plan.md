@@ -96,7 +96,7 @@ results, or join-key correctness. Syntax parsing is not database validation.
 Example configuration:
 
 ```python
-from sql_query_validator import SQLQueryValidator, SQLValidationRules
+from validator.sql_query_validator import SQLQueryValidator, SQLValidationRules
 
 validator = SQLQueryValidator(SQLValidationRules(
     dialect="postgres",
@@ -118,7 +118,7 @@ python3 -m venv .venv
 
 ## In-memory invoice schema
 
-`database.create_database()` returns a new SQLite connection with empty tables:
+`db.database.create_database()` returns a new SQLite connection with empty tables:
 
 - `users`: `user_id INTEGER PRIMARY KEY` and nullable `name TEXT`.
 - `invoices`: `invoice_id INTEGER PRIMARY KEY`, `invoice_amount NUMERIC NOT NULL`, `invoice_date TEXT NOT NULL`, `invoice_status TEXT NOT NULL`, and `user_id INTEGER NOT NULL` referencing `users.user_id`.
@@ -126,7 +126,7 @@ python3 -m venv .venv
 Foreign keys are enabled. Supply dates as `YYYY-MM-DD`; status values have no enum restriction yet. SQLite NUMERIC affinity does not guarantee exact decimal monetary storage; choose an exact monetary representation before production use. No sample data is loaded.
 
 ```python
-from database import create_database
+from db.database import create_database
 
 connection = create_database()
 try:
@@ -141,7 +141,7 @@ Keep the connection open while loading examples and querying them. Each call cre
 
 ## Sample invoice data
 
-`sample_data.create_sample_database()` creates a fresh in-memory database with
+`db.sample_data.create_sample_database()` creates a fresh in-memory database with
 Alice (`user_id=1`) and Bob (`user_id=2`), each with five invoices. Alice's
 amounts are $12,000, $15,000, $18,000, $22,000, and $11,000; Bob's are $500,
 $1,200, $2,500, $8,000, and $9,500. Each user has two paid and three unpaid
@@ -150,7 +150,7 @@ three months ago, using calendar-month shifts and Los Angeles's current date.
 Pass `as_of=date(2026, 10, 9)` for reproducible dates.
 
 ```python
-from sample_data import create_sample_database
+from db.sample_data import create_sample_database
 
 connection = create_sample_database()
 try:
@@ -159,7 +159,7 @@ finally:
     connection.close()
 ```
 
-Run `python3 sample_data.py` to print all ten records. The original
+Run `python3 -m db.sample_data` to print all ten records. The original
 `create_database()` still creates empty tables. The populated database exists
 only while its connection remains open.
 
@@ -168,3 +168,17 @@ are unpaid (three per user). September invoice totals are $33,000 for Alice
 and $3,700 for Bob. These are invoice totals, not confirmed spending or payment
 totals: interpreting “I” requires a user ID, and interpreting “spent” requires
 an agreed business meaning. No payment dates are stored.
+
+## Repository organization and DB engine
+
+- `db/`: schema, sample data, and `SQLiteDBEngine`.
+- `llm/`: query translator and example classes.
+- `validator/`: SQL validator and injected rules.
+- `tests/`: automated checks for these components.
+
+`db.engine.SQLiteDBEngine` currently provides `connect()`, `close()`, and
+context-manager support. It reuses one connection until closed, with foreign
+keys enabled and the empty schema initialized. Reconnecting creates a fresh
+in-memory database. Next, define and implement parameterized SQLite data-access
+methods and their transaction behavior. Query execution is not yet part of the
+engine API. Updated imports and run commands are documented in `README.md`.

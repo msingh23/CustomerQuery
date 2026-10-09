@@ -5,7 +5,7 @@ import sqlite3
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from database import create_database
+from db.database import create_database
 
 
 def months_ago(day: date, months: int) -> date:

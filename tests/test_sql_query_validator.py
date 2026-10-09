@@ -1,6 +1,6 @@
 import unittest
 
-from sql_query_validator import SQLQueryValidator, SQLValidationRules
+from validator.sql_query_validator import SQLQueryValidator, SQLValidationRules
 
 
 class SQLQueryValidatorTests(unittest.TestCase):

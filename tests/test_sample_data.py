@@ -1,7 +1,7 @@
 import unittest
 from datetime import date
 
-from sample_data import create_sample_database, months_ago
+from db.sample_data import create_sample_database, months_ago
 
 
 class SampleDataTests(unittest.TestCase):
