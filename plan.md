@@ -115,3 +115,25 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python -m unittest -v
 ```
+
+## In-memory invoice schema
+
+`database.create_database()` returns a new SQLite connection with empty tables:
+
+- `users`: `user_id INTEGER PRIMARY KEY`. Additional user information fields await definition.
+- `invoices`: `invoice_id INTEGER PRIMARY KEY`, `invoice_amount NUMERIC NOT NULL`, `invoice_date TEXT NOT NULL`, `invoice_status TEXT NOT NULL`, and `user_id INTEGER NOT NULL` referencing `users.user_id`.
+
+Foreign keys are enabled. Supply dates as `YYYY-MM-DD`; status values have no enum restriction yet. SQLite NUMERIC affinity does not guarantee exact decimal monetary storage; choose an exact monetary representation before production use. No sample data is loaded.
+
+```python
+from database import create_database
+
+connection = create_database()
+try:
+    # Populate users first, then their invoices, using parameterized inserts.
+    print(connection.execute("SELECT * FROM invoices").fetchall())
+finally:
+    connection.close()
+```
+
+Keep the connection open while loading examples and querying them. Each call creates a separate database, and closing its connection discards its contents. Use `sqlite` as the SQLGlot dialect when validating SQLite queries.
