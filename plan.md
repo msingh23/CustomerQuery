@@ -70,3 +70,48 @@ Provide the prompt template and Python class that assembles it. Keep the existin
 ## Scaffold validation
 
 Verify that the prompt includes every supplied input, distinguishes good examples from bad examples, and defines the JSON success and failure contracts. Model response validation will be required when LLM calls are added. No model-generated SQL or database behavior is claimed at this stage.
+
+## SQL validator
+
+`SQLQueryValidator` is bootstrapped with `SQLValidationRules`. Its
+`validate(sql_query, failure_codes=())` method returns `(True, None)` on
+success or `(False, reason)` on failure. `validate_response(output,
+failure_codes=())` accepts the translator's decoded JSON object and rejects
+its non-null `failure` field. External failure codes are supplied separately;
+the translator's three-field response contract remains unchanged.
+
+Rules specify the SQLGlot dialect, exact allowed table identities, allowed
+operations, join types, aggregation functions, and an explicit allowlist of
+SQLGlot expression constructs. Initially only SELECT is supported; aggregations
+are SELECT expressions such as SUM and COUNT. Tables must match their qualified
+identity (for example, `public.invoices` must be listed separately). Table
+aliases are supported. Join rules permit types such as INNER and LEFT, rather
+than specific table pairs or relationships. Non-CROSS joins require ON or USING.
+
+The validator parses SQL and rejects constructs outside the allowlist, multiple
+statements, unsupported functions, CTEs, subqueries, and upstream LLM failures.
+It does not execute SQL or verify column existence, database permissions, query
+results, or join-key correctness. Syntax parsing is not database validation.
+
+Example configuration:
+
+```python
+from sql_query_validator import SQLQueryValidator, SQLValidationRules
+
+validator = SQLQueryValidator(SQLValidationRules(
+    dialect="postgres",
+    allowed_tables=frozenset({"invoices", "users"}),
+    allowed_operations=frozenset({"SELECT"}),
+    allowed_joins=frozenset({"INNER", "LEFT"}),
+    allowed_aggregations=frozenset({"SUM", "COUNT"}),
+))
+valid, reason = validator.validate("SELECT invoice_id FROM invoices")
+```
+
+Install and verify from the repository directory:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m unittest -v
+```
