@@ -8,7 +8,8 @@ NLP-to-SQL prompt construction, SQL validation, and an in-memory invoice dataset
 db/
   database.py              # SQLite schema and empty database factory
   sample_data.py           # Alice and Bob sample invoice factory
-  engine.py                # SQLiteDBEngine connection lifecycle scaffold
+  engine.py                # SQLiteDBEngine connection lifecycle
+  executor.py              # SQL execution and dictionary results
 llm/
   llm_query_translator.py   # Prompt template and examples
 validator/
@@ -42,7 +43,30 @@ with SQLiteDBEngine() as engine:
     connection = engine.connect()  # Empty invoice/user schema; reused until close.
 ```
 
-The engine currently manages connection creation and cleanup. Data-access
-methods are the next step. Closing the engine discards its in-memory database;
+The engine manages connection creation and cleanup. `DatabaseExecutor` uses
+its connection to execute SQL and return results. Closing the engine discards its in-memory database;
 reconnecting starts a new empty one. The sample-data factory remains separate
 and returns a populated connection that the caller must close.
+
+
+## Execute queries
+
+```python
+from db.executor import DatabaseExecutor
+from db.sample_data import create_sample_database
+
+connection = create_sample_database()
+try:
+    executor = DatabaseExecutor(connection)
+    results = executor.execute(
+        "SELECT COUNT(*) AS unpaid_count FROM invoices WHERE invoice_status = 'unpaid'"
+    )
+    print(results)  # [{'unpaid_count': 6}]
+finally:
+    connection.close()
+```
+
+`execute(sql_query)` returns a list of dictionaries, or an empty list when no
+rows are returned. Use unique column aliases for joins with duplicate column
+names. Database errors propagate; the caller controls transactions and connection
+cleanup. Validate LLM-generated SQL with `SQLQueryValidator` before execution.

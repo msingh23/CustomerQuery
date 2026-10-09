@@ -180,5 +180,15 @@ an agreed business meaning. No payment dates are stored.
 context-manager support. It reuses one connection until closed, with foreign
 keys enabled and the empty schema initialized. Reconnecting creates a fresh
 in-memory database. Next, define and implement parameterized SQLite data-access
-methods and their transaction behavior. Query execution is not yet part of the
-engine API. Updated imports and run commands are documented in `README.md`.
+methods and their transaction behavior. Query execution is provided separately by `db.executor.DatabaseExecutor`. Updated imports and run commands are documented in `README.md`.
+
+
+## Database executor
+
+`DatabaseExecutor(connection)` uses an existing SQLite connection, including
+one from `SQLiteDBEngine.connect()` or `create_sample_database()`.
+`execute(sql_query)` executes one SQL statement and returns a list of dictionaries
+keyed by result column name. Empty results and statements without result columns
+return `[]`. Duplicate result names require explicit SQL aliases. Errors propagate
+to the caller, which also owns commit, rollback, and connection cleanup. Validation
+remains a separate step before executing LLM-generated SQL.
