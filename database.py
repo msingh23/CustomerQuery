@@ -5,7 +5,8 @@ import sqlite3
 
 SCHEMA = """
 CREATE TABLE users (
-    user_id INTEGER PRIMARY KEY
+    user_id INTEGER PRIMARY KEY,
+    name TEXT
 );
 
 CREATE TABLE invoices (
@@ -23,8 +24,7 @@ def create_database() -> sqlite3.Connection:
     """Return a new, empty database; the caller must close the connection.
 
     Dates should be supplied as ISO dates (YYYY-MM-DD). Invoice statuses are
-    unrestricted until their permitted values are defined. User details can
-    be added when their fields are specified. SQLite NUMERIC affinity does
+    unrestricted until their permitted values are defined. SQLite NUMERIC affinity does
     not guarantee exact decimal storage for monetary amounts.
     """
     connection = sqlite3.connect(":memory:")

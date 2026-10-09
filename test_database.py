@@ -11,7 +11,7 @@ class DatabaseTests(unittest.TestCase):
 
     def test_schema_starts_empty(self):
         expected = {
-            'users': ['user_id'],
+            'users': ['user_id', 'name'],
             'invoices': ['invoice_id', 'invoice_amount', 'invoice_date',
                          'invoice_status', 'user_id'],
         }
@@ -26,7 +26,7 @@ class DatabaseTests(unittest.TestCase):
                 'INSERT INTO invoices VALUES (?, ?, ?, ?, ?)',
                 (1, 100, '2026-01-01', 'unpaid', 1),
             )
-        self.connection.execute('INSERT INTO users VALUES (?)', (1,))
+        self.connection.execute('INSERT INTO users (user_id) VALUES (?)', (1,))
         self.connection.execute(
             'INSERT INTO invoices VALUES (?, ?, ?, ?, ?)',
             (1, 100, '2026-01-01', 'unpaid', 1),
@@ -36,7 +36,7 @@ class DatabaseTests(unittest.TestCase):
         ).fetchall(), [(1,)])
 
     def test_databases_are_isolated(self):
-        self.connection.execute('INSERT INTO users VALUES (?)', (1,))
+        self.connection.execute('INSERT INTO users (user_id) VALUES (?)', (1,))
         other = create_database()
         self.addCleanup(other.close)
         self.assertEqual(other.execute('SELECT COUNT(*) FROM users').fetchone(), (0,))

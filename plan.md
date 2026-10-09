@@ -120,7 +120,7 @@ python3 -m venv .venv
 
 `database.create_database()` returns a new SQLite connection with empty tables:
 
-- `users`: `user_id INTEGER PRIMARY KEY`. Additional user information fields await definition.
+- `users`: `user_id INTEGER PRIMARY KEY` and nullable `name TEXT`.
 - `invoices`: `invoice_id INTEGER PRIMARY KEY`, `invoice_amount NUMERIC NOT NULL`, `invoice_date TEXT NOT NULL`, `invoice_status TEXT NOT NULL`, and `user_id INTEGER NOT NULL` referencing `users.user_id`.
 
 Foreign keys are enabled. Supply dates as `YYYY-MM-DD`; status values have no enum restriction yet. SQLite NUMERIC affinity does not guarantee exact decimal monetary storage; choose an exact monetary representation before production use. No sample data is loaded.
@@ -137,3 +137,34 @@ finally:
 ```
 
 Keep the connection open while loading examples and querying them. Each call creates a separate database, and closing its connection discards its contents. Use `sqlite` as the SQLGlot dialect when validating SQLite queries.
+
+
+## Sample invoice data
+
+`sample_data.create_sample_database()` creates a fresh in-memory database with
+Alice (`user_id=1`) and Bob (`user_id=2`), each with five invoices. Alice's
+amounts are $12,000, $15,000, $18,000, $22,000, and $11,000; Bob's are $500,
+$1,200, $2,500, $8,000, and $9,500. Each user has two paid and three unpaid
+invoices. Dates are today, one month ago (two invoices), two months ago, and
+three months ago, using calendar-month shifts and Los Angeles's current date.
+Pass `as_of=date(2026, 10, 9)` for reproducible dates.
+
+```python
+from sample_data import create_sample_database
+
+connection = create_sample_database()
+try:
+    print(connection.execute("SELECT * FROM invoices").fetchall())
+finally:
+    connection.close()
+```
+
+Run `python3 sample_data.py` to print all ten records. The original
+`create_database()` still creates empty tables. The populated database exists
+only while its connection remains open.
+
+For the October 9, 2026 reference date, five invoices exceed $10,000 and six
+are unpaid (three per user). September invoice totals are $33,000 for Alice
+and $3,700 for Bob. These are invoice totals, not confirmed spending or payment
+totals: interpreting “I” requires a user ID, and interpreting “spent” requires
+an agreed business meaning. No payment dates are stored.
