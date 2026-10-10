@@ -100,8 +100,8 @@ WHERE i.user_id = 1 AND u.user_id = 1
 ```
 
 Scope conditions under OR or NOT do not establish mandatory scope. The
-executor itself does not automatically run these validators; call sites must
-check their boolean results before execution.
+executor itself does not automatically run these validators; `QueryOrchestrator`
+checks their boolean results before execution.
 
 
 ## CLI and invoice response object
@@ -134,3 +134,30 @@ matching to reject direct SQL or database constructs. It is intentionally a
 simple heuristic and may reject ordinary phrases such as "update my invoices".
 It cannot detect all injection attempts and does not replace generated-SQL
 validation or user-scope validation.
+
+
+## Happy-flow orchestration
+
+`QueryOrchestrator.run(user_input, user_id)` validates input, builds the
+translator prompt with schema, rules, examples, current date, and caller ID,
+invokes `LLMClient.generate(prompt)`, validates the decoded JSON and SQL rules,
+checks user scope, executes via the engine connection, and maps rows into a
+`QueryResponse(invoices, reasoning)` through `InvoiceResponseMapper`.
+
+```python
+from application import create_orchestrator
+from db.engine import SQLiteDBEngine
+from db.sample_data import create_sample_database
+
+# Supply your provider client implementing generate(prompt) -> JSON text.
+with SQLiteDBEngine(database_factory=create_sample_database) as engine:
+    orchestrator = create_orchestrator(engine, llm_client=your_llm_client)
+    response = orchestrator.run("show unpaid invoices", user_id=1)
+```
+
+The CLI invokes this same flow after argument parsing and serializes the
+response data classes to JSON. No real LLM provider has been configured; the
+default client reports that prerequisite. Integration tests use a test client,
+not a real model. The current happy flow returns full invoice records and does
+not support aggregate responses. Application error-case design remains future
+work; failed validation raises an exception. The caller owns engine cleanup.

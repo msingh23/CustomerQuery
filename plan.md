@@ -204,8 +204,7 @@ column may be unqualified. Joins require each alias to be scoped independently.
 The initial implementation rejects CTEs, subqueries, unions, unknown tables,
 ambiguous user references, and unsupported SQL constructs. It does not infer
 user scope through joins. Run this and the configured construct/rule validator
-before execution. A future application orchestration layer must enforce that
-sequence; the current executor remains a standalone component.
+before execution. `QueryOrchestrator` now enforces that sequence; the executor remains a standalone component.
 
 
 ## User input and response scaffold
@@ -224,3 +223,19 @@ connect the model, validate its output against application rules and trusted
 user scope, execute the query, and map full invoice rows into response objects.
 The CLI user ID is for local development; production must use authenticated
 identity rather than trust a caller-supplied ID.
+
+
+## Implemented happy-flow orchestrator
+
+`QueryOrchestrator` binds input validation, prompt building, an injectable LLM
+client, SQL validation, user-scope validation, engine/executor access, and
+`InvoiceResponseMapper`. `application.create_orchestrator` configures the SQLite
+schema and full-invoice response rules. `main.py` invokes the orchestrator after
+parsing and serializes `QueryResponse` with invoice objects and concise reasoning.
+The engine supports an injected database factory so the CLI can use sample data.
+
+A real LLM provider remains unconfigured. Happy-flow integration tests use a
+controlled client returning SQL JSON and execute that SQL against SQLite. The
+current response is for invoice records; aggregate requests remain unsupported
+in this flow. Validation exceptions stop execution; a comprehensive error-case
+response design will be implemented separately.
