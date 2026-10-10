@@ -14,7 +14,9 @@ class SQLiteDBEngine:
     SQL execution is provided separately by DatabaseExecutor.
     """
 
-    def __init__(self, database_factory: Callable[[], sqlite3.Connection] = create_database) -> None:
+    def __init__(
+        self, database_factory: Callable[[], sqlite3.Connection] = create_database
+    ) -> None:
         self._connection: sqlite3.Connection | None = None
         self._database_factory = database_factory
 

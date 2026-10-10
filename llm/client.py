@@ -11,4 +11,6 @@ class LLMClient(Protocol):
 
 class UnconfiguredLLMClient:
     def generate(self, prompt: str) -> str:
-        raise RuntimeError('LLM integration is not configured; no invoice query was executed.')
+        raise RuntimeError(
+            "LLM integration is not configured; no invoice query was executed."
+        )

@@ -13,6 +13,6 @@ class Invoice:
     user_id: int
 
     @classmethod
-    def from_row(cls, row: Mapping[str, object]) -> 'Invoice':
+    def from_row(cls, row: Mapping[str, object]) -> "Invoice":
         """Map a full invoice result row; missing fields raise KeyError."""
         return cls(**{name: row[name] for name in cls.__dataclass_fields__})

@@ -4,7 +4,7 @@ import argparse
 from dataclasses import dataclass
 from typing import Sequence
 
-from validator.user_input_validator import UserInputValidator
+from validator.input.query import UserInputValidator
 
 
 @dataclass(frozen=True)
@@ -17,16 +17,22 @@ def positive_user_id(value: str) -> int:
     try:
         user_id = int(value)
     except ValueError:
-        raise argparse.ArgumentTypeError('User ID must be a positive integer.') from None
+        raise argparse.ArgumentTypeError(
+            "User ID must be a positive integer."
+        ) from None
     if user_id <= 0:
-        raise argparse.ArgumentTypeError('User ID must be a positive integer.')
+        raise argparse.ArgumentTypeError("User ID must be a positive integer.")
     return user_id
 
 
 def parse_arguments(argv: Sequence[str] | None = None) -> QueryRequest:
-    parser = argparse.ArgumentParser(description='Query invoices using natural language.')
-    parser.add_argument('--user-id', required=True, type=positive_user_id)
-    parser.add_argument('--query', required=True, help='Natural-language invoice question')
+    parser = argparse.ArgumentParser(
+        description="Query invoices using natural language."
+    )
+    parser.add_argument("--user-id", required=True, type=positive_user_id)
+    parser.add_argument(
+        "--query", required=True, help="Natural-language invoice question"
+    )
     args = parser.parse_args(argv)
     valid, reason = UserInputValidator().validate(args.query)
     if not valid:

@@ -13,7 +13,11 @@ db/
 llm/
   llm_query_translator.py   # Prompt template and examples
 validator/
-  sql_query_validator.py   # Configurable SQL allowlist validation
+  input/
+    query.py                # Natural-language input screening
+  output/
+    sql_query_validator.py   # SQL allowlist validation
+    user_query_validator.py  # Authenticated user scope validation
 tests/                     # Database, engine, sample-data, and validator tests
 cli.py                     # User ID/query argument parsing
 models/invoice.py          # Invoice response data class
@@ -39,7 +43,7 @@ SQLite is included with Python; SQLGlot is the external validation dependency.
 from db.engine import SQLiteDBEngine
 from db.sample_data import create_sample_database
 from llm.llm_query_translator import LLMQueryTranslator, GoodExample, BadExample
-from validator.sql_query_validator import SQLQueryValidator, SQLValidationRules
+from validator.output.sql_query_validator import SQLQueryValidator, SQLValidationRules
 
 with SQLiteDBEngine() as engine:
     connection = engine.connect()  # Empty invoice/user schema; reused until close.
@@ -76,7 +80,7 @@ cleanup. Validate LLM-generated SQL with `SQLQueryValidator` before execution.
 ## Validate authenticated user scope
 
 ```python
-from validator.user_query_validator import UserQueryValidator
+from validator.output.user_query_validator import UserQueryValidator
 
 validator = UserQueryValidator()
 valid, reason = validator.validate(

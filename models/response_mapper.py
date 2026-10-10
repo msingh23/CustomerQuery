@@ -7,5 +7,7 @@ from models.query_response import QueryResponse
 
 
 class InvoiceResponseMapper:
-    def map(self, rows: Sequence[Mapping[str, object]], reasoning: str) -> QueryResponse:
+    def map(
+        self, rows: Sequence[Mapping[str, object]], reasoning: str
+    ) -> QueryResponse:
         return QueryResponse([Invoice.from_row(row) for row in rows], reasoning)

@@ -96,7 +96,7 @@ results, or join-key correctness. Syntax parsing is not database validation.
 Example configuration:
 
 ```python
-from validator.sql_query_validator import SQLQueryValidator, SQLValidationRules
+from validator.output.sql_query_validator import SQLQueryValidator, SQLValidationRules
 
 validator = SQLQueryValidator(SQLValidationRules(
     dialect="postgres",
@@ -195,7 +195,7 @@ remains a separate step before executing LLM-generated SQL.
 
 ## Authenticated user query validation
 
-`validator.user_query_validator.UserQueryValidator(dialect="sqlite")` provides
+`validator.output.user_query_validator.UserQueryValidator(dialect="sqlite")` provides
 `validate(sql_query, original_user)` returning `(valid, reason)`. The user ID
 must come from authentication, not model output or the natural-language request.
 For the current invoice/user schema, each table alias must have an explicit,

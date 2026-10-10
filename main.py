@@ -15,19 +15,25 @@ def main(argv: Sequence[str] | None = None, llm_client: LLMClient | None = None)
     request = parse_arguments(argv)
     try:
         with SQLiteDBEngine(database_factory=create_sample_database) as engine:
-            response = create_orchestrator(engine, llm_client).run(request.query, request.user_id)
+            response = create_orchestrator(engine, llm_client).run(
+                request.query, request.user_id
+            )
         print(json.dumps(asdict(response)))
         return 0
     except (ValueError, RuntimeError) as error:
         failure = str(error)
-    print(json.dumps({
-        'user_id': request.user_id,
-        'query': request.query,
-        'invoices': None,
-        'failure': failure,
-    }))
+    print(
+        json.dumps(
+            {
+                "user_id": request.user_id,
+                "query": request.query,
+                "invoices": None,
+                "failure": failure,
+            }
+        )
+    )
     return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main())
