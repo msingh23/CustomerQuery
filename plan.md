@@ -50,7 +50,7 @@ Do not generate SQL for rule violations, ambiguous requests, insufficient schema
 
 ## Current scope
 
-Provide the prompt template and Python class that assembles it. Keep the existing Hello World entry point. Model calls, database connections, SQL execution, and a user interface are future work.
+Provide the prompt template and Python class that assembles it. Provide a CLI entry point for user ID and natural-language query input. Model calls, database connections, SQL execution, and a user interface are future work.
 
 ## Next steps
 
@@ -206,3 +206,21 @@ ambiguous user references, and unsupported SQL constructs. It does not infer
 user scope through joins. Run this and the configured construct/rule validator
 before execution. A future application orchestration layer must enforce that
 sequence; the current executor remains a standalone component.
+
+
+## User input and response scaffold
+
+`cli.parse_arguments(argv)` requires `--user-id` (positive integer) and `--query`.
+`UserInputValidator` screens the query using a maintained SQL keyword list and
+regex patterns for database constructs. There is one input validator, with no
+separate intent classifier. This heuristic may reject ordinary SQL-related
+words and does not replace output validation.
+
+`models.invoice.Invoice` defines the five invoice columns as a Python data
+class and maps complete result rows through `from_row`. Aggregate queries will
+need a separate result type. `main.py` validates input and explicitly reports
+that LLM integration is not configured, returning no invoice data yet. Next,
+connect the model, validate its output against application rules and trusted
+user scope, execute the query, and map full invoice rows into response objects.
+The CLI user ID is for local development; production must use authenticated
+identity rather than trust a caller-supplied ID.

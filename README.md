@@ -15,7 +15,9 @@ llm/
 validator/
   sql_query_validator.py   # Configurable SQL allowlist validation
 tests/                     # Database, engine, sample-data, and validator tests
-main.py                    # Hello World entry point
+cli.py                     # User ID/query argument parsing
+models/invoice.py          # Invoice response data class
+main.py                    # CLI entry point
 plan.md                    # Design and next steps
 ```
 
@@ -26,7 +28,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python -m db.sample_data
-.venv/bin/python main.py
+.venv/bin/python main.py --help
 ```
 
 SQLite is included with Python; SQLGlot is the external validation dependency.
@@ -100,3 +102,35 @@ WHERE i.user_id = 1 AND u.user_id = 1
 Scope conditions under OR or NOT do not establish mandatory scope. The
 executor itself does not automatically run these validators; call sites must
 check their boolean results before execution.
+
+
+## CLI and invoice response object
+
+```bash
+python3 main.py --user-id 1 --query 'how many are unpaid'
+```
+
+Quote shell input with single quotes when it contains dollar amounts to avoid
+shell expansion, for example:
+
+```bash
+python3 main.py --user-id 1 --query 'show invoices over $10,000'
+```
+
+`cli.parse_arguments()` returns a `QueryRequest` with a positive integer user ID
+and validated natural-language query. Invalid input exits with code 2. The CLI
+currently returns a JSON failure with `invoices: null` and exit code 1 because
+model integration is pending; it does not execute a query or fabricate results.
+A supplied CLI ID is a local development input, not authentication.
+
+`models.invoice.Invoice` is a frozen data class with `invoice_id`,
+`invoice_amount`, `invoice_date`, `invoice_status`, and `user_id`.
+`Invoice.from_row(row)` maps a full invoice result dictionary; use
+`dataclasses.asdict(invoice)` for JSON serialization. Aggregate results such as
+counts need a separate response shape in the future.
+
+`UserInputValidator` maintains SQL keywords and uses case-insensitive regex
+matching to reject direct SQL or database constructs. It is intentionally a
+simple heuristic and may reject ordinary phrases such as "update my invoices".
+It cannot detect all injection attempts and does not replace generated-SQL
+validation or user-scope validation.
