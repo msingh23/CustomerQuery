@@ -35,6 +35,26 @@ class DatabaseTests(unittest.TestCase):
             'SELECT invoice_id FROM invoices JOIN users USING (user_id)'
         ).fetchall(), [(1,)])
 
+    def test_invoice_status_constraint(self):
+        self.connection.execute('INSERT INTO users (user_id) VALUES (?)', (1,))
+        for invoice_id, status in enumerate(('paid', 'unpaid'), start=1):
+            self.connection.execute(
+                'INSERT INTO invoices VALUES (?, ?, ?, ?, ?)',
+                (invoice_id, 100, '2026-01-01', status, 1),
+            )
+        for status in ('pending', 'PAID', '', None):
+            with self.subTest(status=status):
+                with self.assertRaises(sqlite3.IntegrityError):
+                    self.connection.execute(
+                        'INSERT INTO invoices VALUES (?, ?, ?, ?, ?)',
+                        (3, 100, '2026-01-01', status, 1),
+                    )
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.connection.execute(
+                'UPDATE invoices SET invoice_status = ? WHERE invoice_id = ?',
+                ('pending', 1),
+            )
+
     def test_databases_are_isolated(self):
         self.connection.execute('INSERT INTO users (user_id) VALUES (?)', (1,))
         other = create_database()

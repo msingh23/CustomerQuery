@@ -13,7 +13,7 @@ CREATE TABLE invoices (
     invoice_id INTEGER PRIMARY KEY,
     invoice_amount NUMERIC NOT NULL,
     invoice_date TEXT NOT NULL,
-    invoice_status TEXT NOT NULL,
+    invoice_status TEXT NOT NULL CHECK (invoice_status IN ('paid', 'unpaid')),
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
@@ -24,7 +24,7 @@ def create_database() -> sqlite3.Connection:
     """Return a new, empty database; the caller must close the connection.
 
     Dates should be supplied as ISO dates (YYYY-MM-DD). Invoice statuses are
-    unrestricted until their permitted values are defined. SQLite NUMERIC affinity does
+    restricted to 'paid' and 'unpaid'. SQLite NUMERIC affinity does
     not guarantee exact decimal storage for monetary amounts.
     """
     connection = sqlite3.connect(":memory:")

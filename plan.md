@@ -123,7 +123,7 @@ python3 -m venv .venv
 - `users`: `user_id INTEGER PRIMARY KEY` and nullable `name TEXT`.
 - `invoices`: `invoice_id INTEGER PRIMARY KEY`, `invoice_amount NUMERIC NOT NULL`, `invoice_date TEXT NOT NULL`, `invoice_status TEXT NOT NULL`, and `user_id INTEGER NOT NULL` referencing `users.user_id`.
 
-Foreign keys are enabled. Supply dates as `YYYY-MM-DD`; status values have no enum restriction yet. SQLite NUMERIC affinity does not guarantee exact decimal monetary storage; choose an exact monetary representation before production use. No sample data is loaded.
+Foreign keys are enabled. Supply dates as `YYYY-MM-DD`; invoice status is restricted to `paid` or `unpaid` using a SQLite `CHECK` constraint (SQLite has no native enum type). SQLite NUMERIC affinity does not guarantee exact decimal monetary storage; choose an exact monetary representation before production use. No sample data is loaded.
 
 ```python
 from db.database import create_database
