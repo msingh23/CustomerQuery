@@ -43,7 +43,7 @@ SQLite is included with Python; SQLGlot is the external validation dependency.
 from db.engine import SQLiteDBEngine
 from db.sample_data import create_sample_database
 from llm.llm_query_translator import LLMQueryTranslator, GoodExample, BadExample
-from validator.output.sql_query_validator import SQLQueryValidator, SQLValidationRules
+from validator.output import SQLQueryValidator, SQLValidationRules
 
 with SQLiteDBEngine() as engine:
     connection = engine.connect()  # Empty invoice/user schema; reused until close.
@@ -80,7 +80,7 @@ cleanup. Validate LLM-generated SQL with `SQLQueryValidator` before execution.
 ## Validate authenticated user scope
 
 ```python
-from validator.output.user_query_validator import UserQueryValidator
+from validator.output import UserQueryValidator
 
 validator = UserQueryValidator()
 valid, reason = validator.validate(

@@ -96,7 +96,7 @@ results, or join-key correctness. Syntax parsing is not database validation.
 Example configuration:
 
 ```python
-from validator.output.sql_query_validator import SQLQueryValidator, SQLValidationRules
+from validator.output import SQLQueryValidator, SQLValidationRules
 
 validator = SQLQueryValidator(SQLValidationRules(
     dialect="postgres",

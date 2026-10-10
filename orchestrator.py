@@ -11,9 +11,9 @@ from llm.client import LLMClient
 from llm.llm_query_translator import LLMQueryTranslator
 from models.query_response import QueryResponse
 from models.response_mapper import InvoiceResponseMapper
-from validator.output.sql_query_validator import SQLQueryValidator
-from validator.input.query import UserInputValidator
-from validator.output.user_query_validator import UserQueryValidator
+from validator.output import SQLQueryValidator
+from validator.input import UserInputValidator
+from validator.output import UserQueryValidator
 
 
 class QueryOrchestrator:

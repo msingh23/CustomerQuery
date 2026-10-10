@@ -3,7 +3,7 @@ from datetime import date
 
 from db.executor import DatabaseExecutor
 from db.sample_data import create_sample_database
-from validator.output.user_query_validator import UserQueryValidator
+from validator.output import UserQueryValidator
 
 
 class UserQueryValidatorTests(unittest.TestCase):

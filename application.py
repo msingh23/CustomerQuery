@@ -5,8 +5,8 @@ from db.engine import SQLiteDBEngine
 from llm.client import LLMClient, UnconfiguredLLMClient
 from llm.llm_query_translator import LLMQueryTranslator
 from orchestrator import QueryOrchestrator
-from validator.output.sql_query_validator import SQLQueryValidator, SQLValidationRules
-from validator.output.user_query_validator import UserQueryValidator
+from validator.output import SQLQueryValidator, SQLValidationRules
+from validator.output import UserQueryValidator
 
 
 def create_orchestrator(

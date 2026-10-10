@@ -4,7 +4,7 @@ import argparse
 from dataclasses import dataclass
 from typing import Sequence
 
-from validator.input.query import UserInputValidator
+from validator.input import UserInputValidator
 
 
 @dataclass(frozen=True)

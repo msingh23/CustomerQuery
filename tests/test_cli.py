@@ -9,7 +9,7 @@ from db.executor import DatabaseExecutor
 from db.sample_data import create_sample_database
 from main import main
 from models.invoice import Invoice
-from validator.input.query import UserInputValidator
+from validator.input import UserInputValidator
 
 
 class InputTests(unittest.TestCase):
