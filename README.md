@@ -70,3 +70,33 @@ finally:
 rows are returned. Use unique column aliases for joins with duplicate column
 names. Database errors propagate; the caller controls transactions and connection
 cleanup. Validate LLM-generated SQL with `SQLQueryValidator` before execution.
+
+## Validate authenticated user scope
+
+```python
+from validator.user_query_validator import UserQueryValidator
+
+validator = UserQueryValidator()
+valid, reason = validator.validate(
+    "SELECT * FROM invoices WHERE user_id = 1",
+    original_user=1,  # Obtain from trusted authentication context.
+)
+```
+
+Use both the application's configured `SQLQueryValidator` and this validator
+before calling the executor. User validation returns `(True, None)` or
+`(False, reason)`. It supports one SELECT over `invoices` and/or `users`,
+requiring a mandatory WHERE equality to the authenticated integer user ID for
+each table alias. It rejects unsupported constructs, other user-ID equality
+values, ambiguous scope, and missing filters. CTEs, subqueries, and unions are
+unsupported. For joins, explicitly scope both aliases:
+
+```sql
+SELECT i.invoice_id, u.name
+FROM invoices i JOIN users u ON i.user_id = u.user_id
+WHERE i.user_id = 1 AND u.user_id = 1
+```
+
+Scope conditions under OR or NOT do not establish mandatory scope. The
+executor itself does not automatically run these validators; call sites must
+check their boolean results before execution.

@@ -192,3 +192,17 @@ keyed by result column name. Empty results and statements without result columns
 return `[]`. Duplicate result names require explicit SQL aliases. Errors propagate
 to the caller, which also owns commit, rollback, and connection cleanup. Validation
 remains a separate step before executing LLM-generated SQL.
+
+## Authenticated user query validation
+
+`validator.user_query_validator.UserQueryValidator(dialect="sqlite")` provides
+`validate(sql_query, original_user)` returning `(valid, reason)`. The user ID
+must come from authentication, not model output or the natural-language request.
+For the current invoice/user schema, each table alias must have an explicit,
+mandatory `WHERE alias.user_id = original_user` equality. With one table the
+column may be unqualified. Joins require each alias to be scoped independently.
+The initial implementation rejects CTEs, subqueries, unions, unknown tables,
+ambiguous user references, and unsupported SQL constructs. It does not infer
+user scope through joins. Run this and the configured construct/rule validator
+before execution. A future application orchestration layer must enforce that
+sequence; the current executor remains a standalone component.
